@@ -1,0 +1,53 @@
+.div__postpage__container {
+    width: 723px;
+    margin: 44px auto;
+}
+
+.h2__loading__message,
+.h2__notfound__message {
+    text-align: center;
+    margin-top: 40px;
+}
+
+.pagination__container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.pagination__link {
+    padding: 5px 16px;
+    margin: 0 16px;
+    border: 1px solid #777777;
+}
+
+.pagination__link__disabled {
+    color: #777777;
+}
+
+.pagination__pages {
+    padding: 5px 16px;
+    border: 1px solid #000;
+    margin: 0 5px;
+}
+
+.pagination__link__active {
+    background-color: #000;
+    color: #fff;
+}
+
+@media(max-width:767px){
+    .div__postpage__container {
+        width: 95%;
+    }
+
+    .pagination__link {
+        margin:0 5px;
+    }
+}
+
+@media(max-width:320px){
+    .pagination__link {
+        padding: 5px ;
+    }
+}

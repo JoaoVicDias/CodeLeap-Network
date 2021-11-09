@@ -1,0 +1,33 @@
+.form__defaultform__container {
+    padding: 28px 32px;
+    border: 1px solid #999999;
+    background-color: #fff;
+}
+
+.h4__defaultform__title {
+    font-size: 1.375rem;
+    margin-bottom: 30px;
+}
+
+.div__btnform__container {
+    text-align: right;
+}
+
+.btn__defaultform {
+    padding: 7px 30px;
+    text-transform: uppercase;
+    color: #fff;
+    background-color: #000;
+    border: none;
+    transition:opacity .2s ease-in-out;
+}
+
+.btn__defaultform:hover,
+.btn__defaultform:active {
+    opacity: .9;
+}
+
+.btn__defaultform:disabled {
+    background-color: rgb(124, 123, 123);
+    cursor: not-allowed;
+}

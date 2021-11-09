@@ -1,0 +1,9 @@
+.div__modaleditpost__container {
+    width: 723px;
+}
+
+@media(max-width:767px){
+    .div__modaleditpost__container {
+        width: 95%;
+    }
+}

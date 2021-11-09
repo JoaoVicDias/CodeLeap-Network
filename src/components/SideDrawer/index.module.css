@@ -1,0 +1,31 @@
+.aside__sidedrawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 260px;
+    background-color: #000;
+    z-index: 10;
+    border-right: 1px solid #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .3s ease-in-out;
+    transform: translateX(-100%);
+}
+
+.aside__sidedrawer__active {
+    transform: translateY(0);
+}
+
+@media(min-width:767px){
+    .aside__sidedrawer {
+        display: none;
+    }
+}
+
+@media(max-width:420px){
+    .aside__sidedrawer {
+        width: 60%;
+    }
+}

@@ -1,0 +1,21 @@
+.div__filteritems__container {
+    margin-left: 16px;
+}
+
+.div__filteritems__container > label {
+    font-size: 1.1rem;
+    margin-right: 5px;
+}
+
+.div__filteritems__container > input {
+    font-size: 0.9rem;
+    padding: 2px 6px;
+    border: 1px solid #777777;
+    outline: none;
+}
+
+@media(max-width:767px){
+    .div__filteritems__container {
+        margin: 5px 0;
+    }
+}

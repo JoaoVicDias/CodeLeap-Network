@@ -1,0 +1,24 @@
+.div__backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.555);
+    cursor: pointer;
+    transition: transform .3s ease-in-out;
+    transform: translateY(-100%);
+    z-index: 9;
+}
+
+.div__backdrop__active {
+    transform: translateY(0);
+}
+
+@media(min-width:767px){
+    .div__backdrop {
+        display: none;
+    }
+}

@@ -1,0 +1,7 @@
+.div__basepage__container {
+    height: 100%;
+    display: grid;
+    grid-template-areas: 'header'
+                         'content';
+    grid-template-rows: 80px auto;
+}

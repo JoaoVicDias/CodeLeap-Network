@@ -1,0 +1,17 @@
+.div__indexpage__container {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.div__indexpage__container > img {
+    width: 607px;
+}
+
+@media(max-width:767px){
+    .div__indexpage__container > img {
+        width: 60%;
+    }
+    
+}

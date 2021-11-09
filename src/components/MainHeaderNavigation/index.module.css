@@ -1,0 +1,10 @@
+.ul__navigation__items {
+    display: flex;
+    align-items: center;
+}
+
+@media(max-width:767px){
+    .ul__navigation__items {
+        flex-direction: column;
+    }
+}

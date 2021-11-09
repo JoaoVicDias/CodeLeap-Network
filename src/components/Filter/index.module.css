@@ -1,0 +1,13 @@
+.div__filter__container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-top: 60px;
+}
+
+@media(max-width:767px){
+    .div__filter__container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

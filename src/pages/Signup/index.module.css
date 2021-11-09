@@ -1,0 +1,16 @@
+.div__signup__container {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.div__signup__form {
+    width: 500px;
+}
+
+@media(max-width:767px){
+    .div__signup__form {
+        width: 95%;
+    }
+}

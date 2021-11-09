@@ -1,0 +1,6 @@
+export const AUTH_LOGIN = 'AUTH_LOGIN'
+export const AUTH_LOGOUT = 'AUTH_LOGOUT'
+
+
+export const FETCH_POSTS_SUCCESS = 'FETCH_POSTS_SUCCESS'
+export const FETCH_POSTS_START = 'FETCH_POSTS_START'

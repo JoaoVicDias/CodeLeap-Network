@@ -1,0 +1,27 @@
+.span__navigation__item,
+.a__navigation__item {
+    display: inline-block;
+    font-size: 1rem;
+    color: #ffff;
+    margin-left: 20px;
+    transition:opacity .2s ease-in-out;
+}
+
+.span__navigation__hasclickfunction {
+    cursor: pointer;
+}
+
+.a__navigation__item:hover,
+.a__navigation__item:active,
+.span__navigation__hasclickfunction:hover,
+.span__navigation__hasclickfunction:active,
+.a__navigation__item__active {
+    opacity: .8;
+}
+
+@media(max-width:767px){
+    .span__navigation__item,
+    .a__navigation__item {
+        margin: 10px 0;
+    }
+}
