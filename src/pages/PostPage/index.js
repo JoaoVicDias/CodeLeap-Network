@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react'
 import ReactPaginate from 'react-paginate'
 import { connect } from 'react-redux'
-import { v4 } from 'uuid'
 import { toast } from 'react-toastify'
 
 import DefaultForm from '../../components/DefaultForm'
@@ -16,12 +15,21 @@ import * as actionsTypes from '../../actions/index'
 
 import classes from './index.module.css'
 
-const PostPage = ({ posts, onFetchPostDataHandler, onCreatePostHandler, userName, onEditPostHandler, onDeletePostHandler, loading }) => {
+const PostPage = ({ posts, onFetchPostDataHandler, onCreatePostHandler, userName, onEditPostHandler, onDeletePostHandler, loading, totalPosts }) => {
 
-    const perPage = 4
+    let timeoutFilter = undefined
+    const perPage = 10
+    const pageCount = Math.ceil(totalPosts / perPage)
     const [modalEditIsOpen, setModalEditIsOpen] = useState(false)
     const [modalToConfirmDeleteIsOpen, setModalToConfirmDeleteIsOpen] = useState(false)
     const [postIdToDelete, setPostIdToDelete] = useState('')
+    const [linkToFetchData, setLinkToFetchData] = useState('https://dev.codeleap.co.uk/careers/?')
+    const [queryParams, setQueryParams] = useState({
+        paginationQueryParams: '',
+        filterQueryParams: ''
+
+    })
+    const [currentPage, setCurrentPage] = useState(0)
     const [postForm, setPostForm] = useState({
         createpostForm: {
             title: {
@@ -81,23 +89,9 @@ const PostPage = ({ posts, onFetchPostDataHandler, onCreatePostHandler, userName
                 validationRules: {
                     required: true,
                 }
-            },
-            postUserName: {
-                value: '',
-                isValid: false
-            },
-            created_at: {
-                value: '',
-                isValid: false,
             }
         }
     })
-    const [filter, setFilter] = useState({})
-    const [filteredData, setFilteredData] = useState([])
-    const pageCount = Math.ceil(filteredData.length / perPage)
-    const [currentPageData, setCurrentPageData] = useState([])
-    const [currentPage, setCurrentPage] = useState(0)
-    const [offset, setOffset] = useState(0)
 
     const onClearInputsHandler = useCallback((objectKey) => {
         setPostForm((prevState) => {
@@ -125,12 +119,14 @@ const PostPage = ({ posts, onFetchPostDataHandler, onCreatePostHandler, userName
     const onCloseEditModal = useCallback((event) => {
         if (event.target.id === 'backdrop') {
             setModalEditIsOpen(false)
+            onClearInputsHandler('editPostForm')
         }
-    }, [])
+    }, [onClearInputsHandler])
 
     const onCloseConfirmToDeleteModal = useCallback((event) => {
         if (event.target.id === 'backdrop') {
             setModalToConfirmDeleteIsOpen(false)
+            setPostIdToDelete('')
         }
     }, [])
 
@@ -140,17 +136,13 @@ const PostPage = ({ posts, onFetchPostDataHandler, onCreatePostHandler, userName
         if (!userName) return toast.error('You need to signup first!')
 
         const newPost = {
-            id: v4(),
-            postUserName: `${userName.split('')[0].toUpperCase()}${userName.slice(1, userName.lenght)}`,
+            username: `${userName.split('')[0].toUpperCase()}${userName.slice(1, userName.lenght)}`,
             title: postForm['createpostForm'].title.value.trim(),
-            content: postForm['createpostForm'].content.value.trim(),
-            created_at: new Date().toISOString()
+            content: postForm['createpostForm'].content.value.trim()
         }
-
-        onCreatePostHandler(newPost)
-        onClearInputsHandler('createpostForm')
         setCurrentPage(0)
-        toast.success('Post created successfully!')
+        onCreatePostHandler(newPost, 'https://dev.codeleap.co.uk/careers/?')
+        onClearInputsHandler('createpostForm')
     }, [onCreatePostHandler, userName, onClearInputsHandler, postForm])
 
     const onSubmitToEditPostHandler = useCallback((event) => {
@@ -158,16 +150,15 @@ const PostPage = ({ posts, onFetchPostDataHandler, onCreatePostHandler, userName
 
         onEditPostHandler({
             id: postForm.editPostForm.id.value,
-            title: postForm.editPostForm.title.value.trim(),
-            content: postForm.editPostForm.content.value.trim(),
-            postUserName: `${postForm.editPostForm.postUserName.value.split('')[0].toUpperCase()}${postForm.editPostForm.postUserName.value.slice(1, postForm.editPostForm.postUserName.value.lenght)}`,
-            created_at: postForm.editPostForm.created_at.value,
-        })
+            data: {
+                title: postForm.editPostForm.title.value.trim(),
+                content: postForm.editPostForm.content.value.trim()
+            }
+        }, linkToFetchData)
 
         onClearInputsHandler('editPostForm')
         setModalEditIsOpen(false)
-        toast.success('Post edited successfully!')
-    }, [onEditPostHandler, onClearInputsHandler, postForm])
+    }, [onEditPostHandler, onClearInputsHandler, postForm, linkToFetchData])
 
     const createPostFormSettingsMemo = useMemo(() => {
         let formInputsConfig = []
@@ -264,58 +255,52 @@ const PostPage = ({ posts, onFetchPostDataHandler, onCreatePostHandler, userName
     const onSubmitToDeletePostHandler = useCallback((event) => {
         event.preventDefault()
 
-        onDeletePostHandler(postIdToDelete)
+        onDeletePostHandler(postIdToDelete, linkToFetchData)
 
-        toast.success('Post successfully deleted')
         setPostIdToDelete('')
         setModalToConfirmDeleteIsOpen(false)
-    }, [onDeletePostHandler, postIdToDelete])
+    }, [onDeletePostHandler, postIdToDelete, linkToFetchData])
 
-    const handlePageClick = useCallback(({ selected: selectedPage }) => {
-        setCurrentPage(selectedPage);
+    const filterConfigs = useMemo(() => [
+        { label: 'Filter by username:', filterName: 'username' },
+    ], [])
+
+    const onChangeFilterHandler = useCallback((event, filterName) => {
+        clearTimeout(timeoutFilter)
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        timeoutFilter = setTimeout(() => {
+            if (event.target.value.trim().length > 0) {
+                setQueryParams(({
+                    paginationQueryParams: '',
+                    filterQueryParams: `&${filterName}=${event.target.value.trim()}`
+                }))
+            } else {
+                setQueryParams(({
+                    paginationQueryParams: '',
+                    filterQueryParams: ''
+                }))
+            }
+            setCurrentPage(0)
+        }, 500)
     }, [])
 
-    const onSetFilterHandler = useCallback((event, filterName) => {
-        setFilter((prevState) => ({
+    const handlePageClick = useCallback(({ selected: selectedPage }) => {
+        const offset = selectedPage * perPage;
+        setCurrentPage(selectedPage);
+        setQueryParams((prevState) => ({
             ...prevState,
-            [filterName]: event.target.value.trim()
+            paginationQueryParams: `limit=${perPage}${offset > 0 ? `&offset=${offset}` : ''}`,
         }))
     }, [])
 
-    const onFilterHandler = useCallback(() => {
-        setFilteredData(
-            Object.entries(filter).reduce((post, [key, value]) => {
-                return post.filter((post) => post[key].toLowerCase().trim().includes(value.toLowerCase()))
-            }, posts)
-        )
-
-        setCurrentPage(0)
-    }, [filter, posts])
-
-    const filterConfigs = useMemo(() => [
-        { label: 'Filter by title:', filterName: 'title' },
-        { label: 'Filter by username:', filterName: 'postUserName' },
-    ], [])
+    useEffect(() => {
+        setLinkToFetchData(`https://dev.codeleap.co.uk/careers/?${queryParams.paginationQueryParams}${queryParams.filterQueryParams}`)
+    }, [queryParams])
 
     useEffect(() => {
-        onFetchPostDataHandler()
-    }, [onFetchPostDataHandler])
-
-    useEffect(() => {
-        setFilteredData(posts)
-    }, [posts])
-
-    useEffect(() => {
-        onFilterHandler()
-    }, [filter, onFilterHandler])
-
-    useEffect(() => {
-        setOffset(currentPage * perPage)
-    }, [currentPage])
-
-    useEffect(() => {
-        setCurrentPageData(filteredData.slice(offset, offset + perPage))
-    }, [offset, filteredData])
+        onFetchPostDataHandler(linkToFetchData)
+    }, [onFetchPostDataHandler, linkToFetchData])
 
     return (
         <div className={classes.div__postpage__container}>
@@ -328,40 +313,41 @@ const PostPage = ({ posts, onFetchPostDataHandler, onCreatePostHandler, userName
                 title="Are you shure you want to delete this item?"
                 isOpen={modalToConfirmDeleteIsOpen}
                 onClose={onCloseConfirmToDeleteModal}
-                onCancel={(event) => { event.preventDefault(); setModalToConfirmDeleteIsOpen(false) }}
+                onCancel={(event) => { event.preventDefault(); setModalToConfirmDeleteIsOpen(false); setPostIdToDelete('') }}
                 onConfirm={(event) => onSubmitToDeletePostHandler(event)}
             />
             <DefaultForm {...createPostFormSettingsMemo} />
-            <Filter filterConfigs={filterConfigs} onFilterHandler={onSetFilterHandler} />
+            <Filter filterConfigs={filterConfigs} onFilterHandler={onChangeFilterHandler} />
             {
-                loading ? <h2 className={classes.h2__loading__message}> Loading... </h2> : null
-            }
-            {
-                currentPageData.length === 0 && !loading ? <h2 className={classes.h2__notfound__message}> No posts were found! </h2> : null
-            }
-            <PostListItems
-                postList={currentPageData}
-                userName={userName}
-                editHandler={onOpenEditPostModal}
-                deleteHanlder={onOpenConfirmModalToDeleteHandler}
-            />
-            {
-                currentPageData.length === 0 && !loading
-                    ? null
-                    : <ReactPaginate
-                        previousLabel={"Previous"}
-                        nextLabel={"Next"}
-                        pageCount={pageCount}
-                        onPageChange={handlePageClick}
-                        containerClassName={classes.pagination__container}
-                        previousLinkClassName={classes.pagination__link}
-                        nextLinkClassName={classes.pagination__link}
-                        disabledClassName={classes.pagination__link__disabled}
-                        activeClassName={classes.pagination__link__active}
-                        pageClassName={classes.pagination__pages}
-                        forcePage={pageCount > 0 ? currentPage : undefined}
+                loading
+                    ? <h2 className={classes.h2__loading__message}> Loading... </h2>
+                    : <PostListItems
+                        postList={posts}
+                        userName={userName}
+                        editHandler={onOpenEditPostModal}
+                        deleteHanlder={onOpenConfirmModalToDeleteHandler}
                     />
             }
+
+            {
+                posts.length === 0 && !loading ? <h2 className={classes.h2__notfound__message}> No posts were found! </h2> : null
+            }
+
+            <ReactPaginate
+                pageRangeDisplayed={3}
+                breakLabel="..."
+                previousLabel={"Previous"}
+                nextLabel={"Next"}
+                pageCount={pageCount}
+                onPageChange={handlePageClick}
+                containerClassName={classes.pagination__container}
+                previousLinkClassName={classes.pagination__link}
+                nextLinkClassName={classes.pagination__link}
+                disabledClassName={classes.pagination__link__disabled}
+                activeClassName={classes.pagination__link__active}
+                pageClassName={classes.pagination__pages}
+                forcePage={pageCount > 0 ? currentPage : undefined}
+            />
         </div>
     )
 }
@@ -370,16 +356,17 @@ const mapStateToProps = (state) => {
     return {
         posts: state.posts.posts,
         userName: state.auth.userName,
-        loading: state.posts.loading
+        loading: state.posts.loading,
+        totalPosts: state.posts.totalPosts
     }
 }
 
 const mapDispacthToProps = (dispatch) => {
     return {
-        onFetchPostDataHandler: () => dispatch(actionsTypes.onFetchPostDataHandler()),
-        onCreatePostHandler: (data) => dispatch(actionsTypes.onCreatePostHandler(data)),
-        onEditPostHandler: (data) => dispatch(actionsTypes.onEditPostHandler(data)),
-        onDeletePostHandler: (id) => dispatch(actionsTypes.onDeletePostHandler(id))
+        onFetchPostDataHandler: (linkToFetchData) => dispatch(actionsTypes.onFetchPostDataHandler(linkToFetchData)),
+        onCreatePostHandler: (data, linkToFetchData) => dispatch(actionsTypes.onCreatePostHandler(data, linkToFetchData)),
+        onEditPostHandler: (data, linkToFetchData) => dispatch(actionsTypes.onEditPostHandler(data, linkToFetchData)),
+        onDeletePostHandler: (id, linkToFetchData) => dispatch(actionsTypes.onDeletePostHandler(id, linkToFetchData))
     }
 }
 

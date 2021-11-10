@@ -6,18 +6,20 @@
 .h2__loading__message,
 .h2__notfound__message {
     text-align: center;
-    margin-top: 40px;
+    margin: 40px 0;
 }
 
 .pagination__container {
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
 .pagination__link {
+    display: inline-block;
     padding: 5px 16px;
-    margin: 0 16px;
+    margin: 5px 16px;
     border: 1px solid #777777;
 }
 
@@ -28,7 +30,7 @@
 .pagination__pages {
     padding: 5px 16px;
     border: 1px solid #000;
-    margin: 0 5px;
+    margin: 5px;
 }
 
 .pagination__link__active {
@@ -41,13 +43,13 @@
         width: 95%;
     }
 
-    .pagination__link {
-        margin:0 5px;
+    .pagination__container {
+        width: 100%;
     }
+
+    
 }
 
 @media(max-width:320px){
-    .pagination__link {
-        padding: 5px ;
-    }
+    
 }

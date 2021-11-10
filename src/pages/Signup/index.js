@@ -34,7 +34,7 @@ const Signup = ({ onLogin, isLogged }) => {
         event.preventDefault()
 
         onLogin(signupForm.userName.value.trim())
-        toast.success(`Welcome ${signupForm.userName.value.split('')[0].toUpperCase()}${signupForm.userName.value.slice(1, signupForm.userName.value.lenght)}!`)
+        toast.success(`Welcome ${signupForm.userName.value}!`)
     }, [onLogin, signupForm])
 
     const signupFormSettingsMemo = useMemo(() => {

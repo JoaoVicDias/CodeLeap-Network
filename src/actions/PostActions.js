@@ -1,56 +1,87 @@
+import { toast } from 'react-toastify'
+import axios from 'axios'
+
+import CodeLeapApiLink from '../services/CodeLeapApiLink'
 import * as actionTypes from './ActionTypes'
+
+
+const onSortArrayByDate = (data) => (
+    data.sort((itemA, itemB) => (
+        new Date(itemB.created_datetime) - new Date(itemA.created_datetime)
+    ))
+)
 
 export const fetchPostsStart = () => {
     return {
         type: actionTypes.FETCH_POSTS_START
-        }
+    }
 }
 
 export const fetchPostsSuccess = (data) => {
     return {
         type: actionTypes.FETCH_POSTS_SUCCESS,
-        posts: data
+        posts: onSortArrayByDate(data.results),
+        totalPosts: data.count
     }
 }
 
-const onSortArrayByDate = (data) => (
-    data.sort((itemA, itemB) => (
-        new Date(itemB.created_at) - new Date(itemA.created_at)
-    ))
-)
+export const fetchPostsFailed = () => {
+    return {
+        type: actionTypes.FETCH_POSTS_FAILED
+    }
+}
 
-export const onFetchPostDataHandler = () => (
-    (dispatch) => {
+export const onFetchPostDataHandler = (linkToFetchData) => (
+    async (dispatch) => {
         dispatch(fetchPostsStart())
-        const postData = JSON.parse(localStorage.getItem('postsData')) || []
-        dispatch(fetchPostsSuccess(onSortArrayByDate(postData)))
+        try {
+            const postData = await axios.get(linkToFetchData)
+            dispatch(fetchPostsSuccess(postData.data))
+        } catch (error) {
+            console.log(error)
+            dispatch(fetchPostsFailed())
+            toast.error('Something went wrong, try again later!')
+        }
     }
 )
 
-export const onCreatePostHandler = (data) => (
-    (dispatch) => {
-        const postData = JSON.parse(localStorage.getItem('postsData')) || []
-        postData.push(data)
-        localStorage.setItem('postsData', JSON.stringify(postData))
-        dispatch(onFetchPostDataHandler())
+export const onCreatePostHandler = (data, linkToFetchData) => (
+    async (dispatch) => {
+        try {
+            await CodeLeapApiLink.post('/', data)
+            dispatch(onFetchPostDataHandler(linkToFetchData))
+            toast.success('Post created successfully!')
+        } catch (error) {
+            console.log(error)
+            toast.error('Something went wrong while creating a new post, try again later!')
+        }
     }
 )
 
-export const onEditPostHandler = (postEditData) => (
-    (dispatch) => {
-        const postData = JSON.parse(localStorage.getItem('postsData'))
-        const newPostData = postData.filter((post) => post.id !== postEditData.id)
-        newPostData.push(postEditData)
-        localStorage.setItem('postsData', JSON.stringify(newPostData))
-        dispatch(onFetchPostDataHandler())
+export const onEditPostHandler = (postEditData, linkToFetchData) => (
+    async (dispatch) => {
+        const { id, data } = postEditData
+        
+        try {
+            await CodeLeapApiLink.patch(`/${id}/`, data)
+            dispatch(onFetchPostDataHandler(linkToFetchData))
+            toast.success('Post edited successfully!')
+        } catch (error) {
+            console.log(error)
+            toast.error('something went wrong while editing a new post, try again later!')
+        }
     }
 )
 
-export const onDeletePostHandler = (id) => (
-    (dispatch) => {
-        const postData = JSON.parse(localStorage.getItem('postsData'))
-        const newPostData = postData.filter((post) => post.id !== id)
-        localStorage.setItem('postsData', JSON.stringify(newPostData))
-        dispatch(onFetchPostDataHandler())
+export const onDeletePostHandler = (id, linkToFetchData) => (
+    async (dispatch) => {
+        try {
+            await CodeLeapApiLink.delete(`/${id}/`)
+            dispatch(onFetchPostDataHandler(linkToFetchData))
+            toast.success('Post deleted successfully!')
+        } catch(error) {
+            console.log(error)
+            toast.error('something went wrong while deleting a new post, try again later!')
+        }
     }
 )

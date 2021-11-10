@@ -10,7 +10,7 @@ const PostsListItems = ({ postList, userName, editHandler, deleteHanlder }) => (
             postList.map((post) => (
                 <PostItem
                     key={post.id}
-                    userName={userName}
+                    loggedUserName={userName}
                     editHandler={editHandler}
                     deleteHanlder={deleteHanlder}
                     {...post}

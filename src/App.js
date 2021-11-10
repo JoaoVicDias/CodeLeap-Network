@@ -16,7 +16,7 @@ const App = ({ onTryAutoSignup, isLogged, userName, logoutDispatch }) => {
   const navigationItemsMemo = useMemo(() => [
     { label: 'All posts', to: '/posts' },
     { label: 'Signup', to: '/signup', show: !isLogged },
-    { label: `Hi ${`${userName.split('')[0]?.toUpperCase()}${userName.slice(1, userName.lenght)}`}`, show: isLogged },
+    { label: `Hi ${userName}`, show: isLogged },
     { label: 'Log out', show: isLogged, onClick: logoutDispatch },
   ], [isLogged, userName, logoutDispatch])
 

@@ -2,7 +2,8 @@ import * as actionTypes from '../actions/ActionTypes'
 
 const initialState = {
     posts: [],
-    loading: false
+    loading: false,
+    totalPosts: 0
 }
 
 const reducer = (state = initialState, action) => {
@@ -17,9 +18,15 @@ const reducer = (state = initialState, action) => {
             return {
                 ...state,
                 posts: action.posts,
-                loading: false
+                loading: false,
+                totalPosts: action.totalPosts
             }
 
+        case actionTypes.FETCH_POSTS_FAILED:
+            return {
+                ...state,
+                loading: false
+            }
         default:
             return state
     }
